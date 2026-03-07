@@ -30,6 +30,13 @@ function RootStack() {
         <Stack>
             <Stack.Protected guard={isSignedIn}>
                 <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                <Stack.Screen
+                    name='profile'
+                    options={{
+                        presentation: 'modal',
+                        headerShown: false,
+                    }}
+                />
             </Stack.Protected>
             <Stack.Protected guard={!isSignedIn}>
                 <Stack.Screen name='(auth)' options={{ headerShown: false }} />
