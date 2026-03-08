@@ -50,6 +50,13 @@ export default function Layout() {
                     headerRight: HeaderRight,
                 }}
             />
+            <Stack.Screen
+                name='[id]'
+                options={{
+                    title: 'Details',
+                    presentation: 'modal',
+                }}
+            />
         </Stack>
     );
 }

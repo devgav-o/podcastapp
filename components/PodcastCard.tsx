@@ -1,6 +1,7 @@
 import { View, Text, Image, Pressable } from 'react-native';
 import React from 'react';
 import { Feed } from '@/types';
+import { router } from 'expo-router';
 
 function formatNumber(num: number): string {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -14,6 +15,7 @@ export default function PodcastCard({ podcast }: { podcast: Feed }) {
 
     return (
         <Pressable
+            onPress={() => router.navigate(`(home)/${podcast.id}`)}
             style={{
                 borderCurve: 'continuous',
                 overflow: 'hidden',
