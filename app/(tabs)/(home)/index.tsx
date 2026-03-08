@@ -1,18 +1,40 @@
-import { Button, ScrollView } from 'react-native';
+import { ActivityIndicator, Button, ScrollView, View } from 'react-native';
 import { Text } from 'react-native';
 import { fetchTrending } from '@/services/podcast-index';
+import { useQuery } from '@tanstack/react-query';
+import { FlashList } from '@shopify/flash-list';
 
 export default function HomeScreen() {
-    const onPress = async () => {
-        console.log('Fetching Data');
-        const data = await fetchTrending();
-        console.log(JSON.stringify(data, null, 2));
-    };
+    const { data, error, isLoading, refetch } = useQuery({
+        queryKey: ['trending'],
+        queryFn: async () => {
+            const data = await fetchTrending();
+            return data;
+        },
+    });
 
+    if (isLoading) {
+        return <ActivityIndicator />;
+    }
+    if (error) {
+        return (
+            <View>
+                <Text>Error fetching trending podcasts</Text>
+                <Button title='Retry' onPress={() => refetch()} />
+            </View>
+        );
+    }
     return (
         <ScrollView contentInsetAdjustmentBehavior='automatic'>
             <Text>Welcome to the Podcast App!</Text>
-            <Button title='Fetch Trending' onPress={onPress} />
+            <FlashList
+                data={data?.feeds}
+                renderItem={({ item }) => (
+                    <View>
+                        <Text>{item.title}</Text>
+                    </View>
+                )}
+            />
         </ScrollView>
     );
 }
