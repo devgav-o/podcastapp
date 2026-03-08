@@ -53,7 +53,7 @@ export default function Layout() {
             <Stack.Screen
                 name='[id]'
                 options={{
-                    title: 'Details',
+                    headerShown: false,
                     presentation: 'modal',
                 }}
             />
