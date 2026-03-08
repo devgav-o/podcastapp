@@ -46,7 +46,7 @@ export default function Layout() {
             <Stack.Screen
                 name='index'
                 options={{
-                    title: 'Home',
+                    title: 'Trending',
                     headerRight: HeaderRight,
                 }}
             />

@@ -1,8 +1,9 @@
-import { ActivityIndicator, Button, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, View } from 'react-native';
 import { Text } from 'react-native';
 import { fetchTrending } from '@/services/podcast-index';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
+import PodcastCard from '@/components/PodcastCard';
 
 export default function HomeScreen() {
     const { data, error, isLoading, refetch } = useQuery({
@@ -25,18 +26,18 @@ export default function HomeScreen() {
         );
     }
     return (
-        <ScrollView contentInsetAdjustmentBehavior='automatic'>
-            <Text className='text-amber-200 text-2xl'>
-                Welcome to the Podcast App!
-            </Text>
-            <FlashList
-                data={data?.feeds}
-                renderItem={({ item }) => (
-                    <View>
-                        <Text>{item.title}</Text>
-                    </View>
-                )}
-            />
-        </ScrollView>
+        <FlatList
+            contentContainerClassName='gap-4 p-4'
+            columnWrapperClassName=''
+            data={data?.feeds}
+            renderItem={({ item }) => (
+                <View style={{ flex: 1 }}>
+                    <PodcastCard podcast={item} />
+                </View>
+            )}
+            contentInsetAdjustmentBehavior='automatic'
+            numColumns={2}
+            columnWrapperStyle={{ gap: 16 }}
+        />
     );
 }
