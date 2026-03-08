@@ -7,14 +7,16 @@ import {
     Text,
     View,
     ScrollView,
-    PlatformColor,
     StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWarmUpBrowser } from '../../hooks/useWarmUpBrowser';
 import { useOAuth } from '@clerk/expo';
 import * as Linking from 'expo-linking';
 import { Image } from 'expo-image';
+import { colors } from '../../constants/colors';
 
 export default function Page() {
     const { signIn, errors, fetchStatus } = useSignIn();
@@ -121,76 +123,83 @@ export default function Page() {
     if (signIn.status === 'needs_client_trust') {
         return (
             <SafeAreaView style={styles.container}>
-                <ScrollView
-                    contentInsetAdjustmentBehavior='automatic'
-                    contentContainerStyle={styles.scrollContent}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.keyboardView}
                 >
-                    <View style={styles.headerSection}>
-                        <Text style={styles.title}>Verify your account</Text>
-                        <Text style={styles.subtitle}>
-                            Enter the verification code sent to your email
-                        </Text>
-                    </View>
-
-                    <View style={styles.formSection}>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>
-                                Verification Code
+                    <ScrollView
+                        contentInsetAdjustmentBehavior='automatic'
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={styles.headerSection}>
+                            <View style={styles.iconContainer}>
+                                <Text style={styles.iconEmoji}>✉️</Text>
+                            </View>
+                            <Text style={styles.title}>Verify your account</Text>
+                            <Text style={styles.subtitle}>
+                                Enter the verification code sent to your email
                             </Text>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    touchedFields.code &&
-                                        errors.fields.code &&
-                                        styles.inputError,
-                                ]}
-                                value={code}
-                                placeholder='123456'
-                                placeholderTextColor={PlatformColor(
-                                    'placeholderText',
-                                )}
-                                onChangeText={(code) => setCode(code)}
-                                onBlur={() => handleBlur('code')}
-                                keyboardType='numeric'
-                                autoComplete='one-time-code'
-                            />
-                            {touchedFields.code && errors.fields.code && (
-                                <Text style={styles.errorText} selectable>
-                                    {errors.fields.code.message}
-                                </Text>
-                            )}
                         </View>
 
-                        <Pressable
-                            style={({ pressed }) => [
-                                styles.primaryButton,
-                                fetchStatus === 'fetching' &&
-                                    styles.buttonDisabled,
-                                pressed && styles.buttonPressed,
-                            ]}
-                            onPress={handleVerify}
-                            disabled={fetchStatus === 'fetching'}
-                        >
-                            <Text style={styles.primaryButtonText}>
-                                {fetchStatus === 'fetching'
-                                    ? 'Verifying...'
-                                    : 'Verify'}
-                            </Text>
-                        </Pressable>
+                        <View style={styles.formSection}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel}>
+                                    Verification Code
+                                </Text>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        touchedFields.code &&
+                                            errors.fields.code &&
+                                            styles.inputError,
+                                    ]}
+                                    value={code}
+                                    placeholder='123456'
+                                    placeholderTextColor={colors.smoke}
+                                    onChangeText={(code) => setCode(code)}
+                                    onBlur={() => handleBlur('code')}
+                                    keyboardType='numeric'
+                                    autoComplete='one-time-code'
+                                />
+                                {touchedFields.code && errors.fields.code && (
+                                    <Text style={styles.errorText} selectable>
+                                        {errors.fields.code.message}
+                                    </Text>
+                                )}
+                            </View>
 
-                        <Pressable
-                            style={({ pressed }) => [
-                                styles.secondaryButton,
-                                pressed && styles.buttonPressed,
-                            ]}
-                            onPress={() => signIn.mfa.sendEmailCode()}
-                        >
-                            <Text style={styles.secondaryButtonText}>
-                                Didn't receive a code? Send again
-                            </Text>
-                        </Pressable>
-                    </View>
-                </ScrollView>
+                            <Pressable
+                                style={({ pressed }) => [
+                                    styles.primaryButton,
+                                    fetchStatus === 'fetching' &&
+                                        styles.buttonDisabled,
+                                    pressed && styles.buttonPressed,
+                                ]}
+                                onPress={handleVerify}
+                                disabled={fetchStatus === 'fetching'}
+                            >
+                                <Text style={styles.primaryButtonText}>
+                                    {fetchStatus === 'fetching'
+                                        ? 'Verifying...'
+                                        : 'Verify'}
+                                </Text>
+                            </Pressable>
+
+                            <Pressable
+                                style={({ pressed }) => [
+                                    styles.secondaryButton,
+                                    pressed && styles.buttonPressed,
+                                ]}
+                                onPress={() => signIn.mfa.sendEmailCode()}
+                            >
+                                <Text style={styles.secondaryButtonText}>
+                                    Didn't receive a code? Send again
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </SafeAreaView>
         );
     }
@@ -200,135 +209,144 @@ export default function Page() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView
-                contentInsetAdjustmentBehavior='automatic'
-                contentContainerStyle={styles.scrollContent}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardView}
             >
-                <View style={styles.headerSection}>
-                    <Text style={styles.title}>Welcome back</Text>
-                    <Text style={styles.subtitle}>
-                        Sign in to continue to your account
-                    </Text>
-                </View>
-
-                <View style={styles.formSection}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Email</Text>
-                        <TextInput
-                            style={[
-                                styles.input,
-                                touchedFields.email &&
-                                    errors.fields.identifier &&
-                                    styles.inputError,
-                            ]}
-                            autoCapitalize='none'
-                            autoCorrect={false}
-                            value={emailAddress}
-                            placeholder='you@example.com'
-                            placeholderTextColor={PlatformColor(
-                                'placeholderText',
-                            )}
-                            onChangeText={(emailAddress) =>
-                                setEmailAddress(emailAddress)
-                            }
-                            onBlur={() => handleBlur('email')}
-                            keyboardType='email-address'
-                            textContentType='emailAddress'
-                        />
-                        {touchedFields.email && errors.fields.identifier && (
-                            <Text style={styles.errorText} selectable>
-                                {errors.fields.identifier.message}
-                            </Text>
-                        )}
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <View style={styles.labelRow}>
-                            <Text style={styles.inputLabel}>Password</Text>
-                            <Link href='/forgot-password'>
-                                <Text style={styles.forgotLink}>Forgot?</Text>
-                            </Link>
+                <ScrollView
+                    contentInsetAdjustmentBehavior='automatic'
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps='handled'
+                >
+                    <View style={styles.headerSection}>
+                        <View style={styles.logoContainer}>
+                            <View style={styles.logo}>
+                                <Text style={styles.logoText}>P</Text>
+                            </View>
                         </View>
-                        <TextInput
-                            style={[
-                                styles.input,
-                                touchedFields.password &&
-                                    errors.fields.password &&
-                                    styles.inputError,
-                            ]}
-                            value={password}
-                            placeholder='Enter your password'
-                            placeholderTextColor={PlatformColor(
-                                'placeholderText',
+                        <Text style={styles.kicker}>Welcome back</Text>
+                        <Text style={styles.title}>Sign in to continue</Text>
+                        <Text style={styles.subtitle}>
+                            to your podcast sanctuary
+                        </Text>
+                    </View>
+
+                    <View style={styles.formSection}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.inputLabel}>Email</Text>
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    touchedFields.email &&
+                                        errors.fields.identifier &&
+                                        styles.inputError,
+                                ]}
+                                autoCapitalize='none'
+                                autoCorrect={false}
+                                value={emailAddress}
+                                placeholder='you@example.com'
+                                placeholderTextColor={colors.smoke}
+                                onChangeText={(emailAddress) =>
+                                    setEmailAddress(emailAddress)
+                                }
+                                onBlur={() => handleBlur('email')}
+                                keyboardType='email-address'
+                                textContentType='emailAddress'
+                            />
+                            {touchedFields.email && errors.fields.identifier && (
+                                <Text style={styles.errorText} selectable>
+                                    {errors.fields.identifier.message}
+                                </Text>
                             )}
-                            secureTextEntry={true}
-                            onChangeText={(password) => setPassword(password)}
-                            onBlur={() => handleBlur('password')}
-                            textContentType='password'
-                        />
-                        {touchedFields.password && errors.fields.password && (
-                            <Text style={styles.errorText} selectable>
-                                {errors.fields.password.message}
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.inputLabel}>Password</Text>
+                                <Link href='/forgot-password'>
+                                    <Text style={styles.forgotLink}>Forgot?</Text>
+                                </Link>
+                            </View>
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    touchedFields.password &&
+                                        errors.fields.password &&
+                                        styles.inputError,
+                                ]}
+                                value={password}
+                                placeholder='Enter your password'
+                                placeholderTextColor={colors.smoke}
+                                secureTextEntry={true}
+                                onChangeText={(password) => setPassword(password)}
+                                onBlur={() => handleBlur('password')}
+                                textContentType='password'
+                            />
+                            {touchedFields.password && errors.fields.password && (
+                                <Text style={styles.errorText} selectable>
+                                    {errors.fields.password.message}
+                                </Text>
+                            )}
+                        </View>
+
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.primaryButton,
+                                (!isFormValid || isLoading) &&
+                                    styles.buttonDisabled,
+                                pressed && styles.buttonPressed,
+                            ]}
+                            onPress={handleSubmit}
+                            disabled={!isFormValid || isLoading}
+                        >
+                            <Text style={styles.primaryButtonText}>
+                                {isLoading ? 'Signing in...' : 'Sign in'}
                             </Text>
-                        )}
+                        </Pressable>
                     </View>
 
-                    <Pressable
-                        style={({ pressed }) => [
-                            styles.primaryButton,
-                            (!isFormValid || isLoading) &&
-                                styles.buttonDisabled,
-                            pressed && styles.buttonPressed,
-                        ]}
-                        onPress={handleSubmit}
-                        disabled={!isFormValid || isLoading}
-                    >
-                        <Text style={styles.primaryButtonText}>
-                            {isLoading ? 'Signing in...' : 'Sign in'}
-                        </Text>
-                    </Pressable>
-                </View>
+                    <View style={styles.socialSection}>
+                        <View style={styles.divider}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>or</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
 
-                <View style={styles.socialSection}>
-                    <View style={styles.divider}>
-                        <View style={styles.dividerLine} />
-                        <Text style={styles.dividerText}>or</Text>
-                        <View style={styles.dividerLine} />
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.socialButton,
+                                isGoogleLoading && styles.buttonDisabled,
+                                pressed && styles.buttonPressed,
+                            ]}
+                            onPress={handleGoogleSignIn}
+                            disabled={isGoogleLoading}
+                        >
+                            <Image
+                                source={{
+                                    uri: 'https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg',
+                                }}
+                                style={styles.socialIcon}
+                                contentFit='contain'
+                            />
+                            <Text style={styles.socialButtonText}>
+                                {isGoogleLoading
+                                    ? 'Signing in...'
+                                    : 'Continue with Google'}
+                            </Text>
+                        </Pressable>
                     </View>
 
-                    <Pressable
-                        style={({ pressed }) => [
-                            styles.socialButton,
-                            isGoogleLoading && styles.buttonDisabled,
-                            pressed && styles.buttonPressed,
-                        ]}
-                        onPress={handleGoogleSignIn}
-                        disabled={isGoogleLoading}
-                    >
-                        <Image
-                            source={{
-                                uri: 'https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg',
-                            }}
-                            style={styles.socialIcon}
-                            contentFit='contain'
-                        />
-                        <Text style={styles.socialButtonText}>
-                            {isGoogleLoading
-                                ? 'Signing in...'
-                                : 'Continue with Google'}
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>
+                            Don't have an account?
                         </Text>
-                    </Pressable>
-                </View>
-
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>
-                        Don't have an account?
-                    </Text>
-                    <Link href='/sign-up'>
-                        <Text style={styles.linkText}>Sign up</Text>
-                    </Link>
-                </View>
-            </ScrollView>
+                        <Link href='/sign-up'>
+                            <Text style={styles.linkText}>Sign up</Text>
+                        </Link>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -336,34 +354,63 @@ export default function Page() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: PlatformColor('systemBackground'),
+        backgroundColor: colors.parchment,
+    },
+    keyboardView: {
+        flex: 1,
     },
     scrollContent: {
         flexGrow: 1,
         paddingHorizontal: 24,
-        paddingTop: 80,
-        paddingBottom: 40,
-        gap: 32,
+        paddingTop: 24,
+        paddingBottom: 24,
     },
     headerSection: {
+        alignItems: 'center',
         gap: 8,
+        marginBottom: 32,
+    },
+    logoContainer: {
+        marginBottom: 8,
+    },
+    logo: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        backgroundColor: colors.sienna,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    logoText: {
+        fontSize: 28,
+        fontWeight: '700',
+        color: colors.cream,
+        fontFamily: 'serif',
+    },
+    kicker: {
+        fontSize: 11,
+        fontWeight: '500',
+        color: colors.smoke,
+        letterSpacing: 0.15,
+        textTransform: 'uppercase',
     },
     title: {
-        fontSize: 34,
-        fontWeight: '700' as const,
-        color: PlatformColor('label'),
-        letterSpacing: -0.5,
+        fontSize: 26,
+        fontWeight: '600',
+        color: colors.bark,
+        letterSpacing: -0.3,
+        fontFamily: 'serif',
     },
     subtitle: {
-        fontSize: 17,
-        color: PlatformColor('secondaryLabel'),
-        lineHeight: 24,
+        fontSize: 14,
+        color: colors.smoke,
+        textAlign: 'center',
     },
     formSection: {
-        gap: 20,
+        gap: 16,
     },
     inputGroup: {
-        gap: 8,
+        gap: 6,
     },
     labelRow: {
         flexDirection: 'row',
@@ -372,116 +419,132 @@ const styles = StyleSheet.create({
     },
     inputLabel: {
         fontSize: 13,
-        fontWeight: '600' as const,
-        color: PlatformColor('label'),
-        textTransform: 'uppercase' as const,
-        letterSpacing: 0.5,
+        fontWeight: '500',
+        color: colors.clay,
     },
     forgotLink: {
-        fontSize: 14,
-        fontWeight: '500' as const,
-        color: '#0a7ea4',
+        fontSize: 13,
+        fontWeight: '500',
+        color: colors.sienna,
     },
     input: {
         borderWidth: 1,
-        borderColor: PlatformColor('separator'),
+        borderColor: colors.umber,
         borderRadius: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 14,
         paddingVertical: 14,
         fontSize: 16,
-        backgroundColor: PlatformColor('secondarySystemBackground'),
-        color: PlatformColor('label'),
+        backgroundColor: colors.cream,
+        color: colors.bark,
     },
     inputError: {
-        borderColor: '#d32f2f',
+        borderColor: colors.rust,
     },
     primaryButton: {
-        backgroundColor: '#0a7ea4',
+        backgroundColor: colors.amber,
         paddingVertical: 16,
         borderRadius: 12,
-        alignItems: 'center' as const,
-        boxShadow: '0 2px 8px rgba(10, 126, 164, 0.3)',
+        alignItems: 'center',
+        marginTop: 8,
     },
     primaryButtonText: {
-        color: '#fff',
+        color: colors.peat,
         fontSize: 17,
-        fontWeight: '600' as const,
+        fontWeight: '600',
     },
     secondaryButton: {
         paddingVertical: 14,
-        borderRadius: 12,
-        alignItems: 'center' as const,
+        borderRadius: 14,
+        alignItems: 'center',
     },
     secondaryButtonText: {
-        color: '#0a7ea4',
-        fontSize: 15,
-        fontWeight: '500' as const,
+        color: colors.clay,
+        fontSize: 14,
+        fontWeight: '500',
     },
     buttonPressed: {
-        opacity: 0.7,
+        opacity: 0.85,
+        transform: [{ scale: 0.98 }],
     },
     buttonDisabled: {
         opacity: 0.5,
     },
     divider: {
         flexDirection: 'row',
-        alignItems: 'center' as const,
+        alignItems: 'center',
         width: '100%',
+        marginVertical: 16,
     },
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: PlatformColor('separator'),
+        backgroundColor: colors.umber,
+        opacity: 0.2,
     },
     dividerText: {
-        marginHorizontal: 16,
-        color: PlatformColor('secondaryLabel'),
-        fontSize: 13,
-        fontWeight: '500' as const,
+        marginHorizontal: 12,
+        color: colors.smoke,
+        fontSize: 12,
+        fontWeight: '500',
     },
     socialSection: {
-        gap: 20,
-        alignItems: 'center' as const,
+        gap: 16,
+        alignItems: 'center',
     },
     socialButton: {
         flexDirection: 'row',
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-        backgroundColor: PlatformColor('secondarySystemBackground'),
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.cream,
         borderWidth: 1,
-        borderColor: PlatformColor('separator'),
+        borderColor: colors.umber,
         borderRadius: 12,
         paddingVertical: 14,
-        paddingHorizontal: 20,
+        paddingHorizontal: 16,
         width: '100%',
     },
     socialIcon: {
-        width: 20,
-        height: 20,
-        marginRight: 10,
+        width: 22,
+        height: 22,
+        marginRight: 12,
     },
     socialButtonText: {
-        color: PlatformColor('label'),
-        fontSize: 16,
-        fontWeight: '500' as const,
+        color: colors.bark,
+        fontSize: 15,
+        fontWeight: '500',
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 4,
+        marginTop: 24,
     },
     footerText: {
-        fontSize: 15,
-        color: PlatformColor('secondaryLabel'),
+        fontSize: 14,
+        color: colors.smoke,
     },
     linkText: {
-        fontSize: 15,
-        fontWeight: '600' as const,
-        color: '#0a7ea4',
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.sienna,
     },
     errorText: {
-        color: '#d32f2f',
+        color: colors.rust,
         fontSize: 13,
-        fontWeight: '500' as const,
+        fontWeight: '500',
+    },
+    iconContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        backgroundColor: colors.cream,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: colors.umber,
+    },
+    iconEmoji: {
+        fontSize: 32,
     },
 });
