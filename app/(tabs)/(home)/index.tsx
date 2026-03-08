@@ -26,7 +26,9 @@ export default function HomeScreen() {
     }
     return (
         <ScrollView contentInsetAdjustmentBehavior='automatic'>
-            <Text>Welcome to the Podcast App!</Text>
+            <Text className='text-amber-200 text-2xl'>
+                Welcome to the Podcast App!
+            </Text>
             <FlashList
                 data={data?.feeds}
                 renderItem={({ item }) => (
