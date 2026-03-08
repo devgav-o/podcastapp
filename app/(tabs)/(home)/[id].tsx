@@ -1,4 +1,5 @@
-import { fetchFeedById } from '@/services/podcast-index';
+import EpisodeCard from '@/components/EpisodeCard';
+import { fetchEpisodesByFeedId, fetchFeedById } from '@/services/podcast-index';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import {
     ActivityIndicator,
     Pressable,
     Linking,
+    FlatList,
 } from 'react-native';
 
 function formatNumber(num: number): string {
@@ -35,6 +37,14 @@ export default function PodcastDetails() {
     });
     const podcast = data?.feed;
 
+    const {
+        data: episodesData,
+        error: episodesError,
+        isLoading: episodesLoading,
+    } = useQuery({
+        queryKey: ['episodes', id],
+        queryFn: () => fetchEpisodesByFeedId(id),
+    });
     if (isLoading) {
         return (
             <View
@@ -205,36 +215,31 @@ export default function PodcastDetails() {
                                 color: '#444',
                                 lineHeight: 22,
                             }}
-                            numberOfLines={expanded ? undefined : 4}
+                            numberOfLines={expanded ? undefined : 2}
                         >
                             {podcast.description}
                         </Text>
-                        {podcast.description && podcast.description.length > 200 && (
-                            <Pressable onPress={() => setExpanded(!expanded)}>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: '#007AFF',
-                                        fontWeight: '600',
-                                        marginTop: 4,
-                                    }}
+                        {podcast.description &&
+                            podcast.description.length > 200 && (
+                                <Pressable
+                                    onPress={() => setExpanded(!expanded)}
                                 >
-                                    {expanded ? 'Show less' : 'Read more'}
-                                </Text>
-                            </Pressable>
-                        )}
+                                    <Text
+                                        style={{
+                                            fontSize: 15,
+                                            color: '#007AFF',
+                                            fontWeight: '600',
+                                            marginTop: 4,
+                                        }}
+                                    >
+                                        {expanded ? 'Show less' : 'Read more'}
+                                    </Text>
+                                </Pressable>
+                            )}
                     </View>
                 </View>
 
-                <View
-                    style={{
-                        height: 1,
-                        backgroundColor: '#e5e5e5',
-                        marginVertical: 4,
-                    }}
-                />
-
-                <View style={{ gap: 12 }}>
+                <View style={{ gap: 12, marginTop: 8 }}>
                     <Text
                         style={{
                             fontSize: 18,
@@ -242,94 +247,20 @@ export default function PodcastDetails() {
                             color: '#000',
                         }}
                     >
-                        Details
+                        Episodes
                     </Text>
-                    <View style={{ gap: 8 }}>
-                        {podcast.ownerName && (
-                            <View style={{ flexDirection: 'row', gap: 8 }}>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: '#888',
-                                        width: 100,
-                                    }}
-                                >
-                                    Owner
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: '#333',
-                                        flex: 1,
-                                    }}
-                                >
-                                    {podcast.ownerName}
-                                </Text>
-                            </View>
-                        )}
-                        {podcast.language && (
-                            <View style={{ flexDirection: 'row', gap: 8 }}>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: '#888',
-                                        width: 100,
-                                    }}
-                                >
-                                    Language
-                                </Text>
-                                <Text
-                                    style={{
-                                        fontSize: 15,
-                                        color: '#333',
-                                        flex: 1,
-                                    }}
-                                >
-                                    {podcast.language}
-                                </Text>
-                            </View>
-                        )}
-                        <View style={{ flexDirection: 'row', gap: 8 }}>
-                            <Text
-                                style={{
-                                    fontSize: 15,
-                                    color: '#888',
-                                    width: 100,
-                                }}
-                            >
-                                Updated
-                            </Text>
-                            <Text
-                                style={{ fontSize: 15, color: '#333', flex: 1 }}
-                            >
-                                {formatDate(podcast.lastUpdateTime)}
-                            </Text>
-                        </View>
-                    </View>
                 </View>
-
-                <Pressable
-                    onPress={() =>
-                        podcast.link && Linking.openURL(podcast.link)
-                    }
-                    style={{
-                        backgroundColor: '#007AFF',
-                        paddingVertical: 14,
-                        borderRadius: 12,
-                        alignItems: 'center',
-                        marginTop: 8,
-                    }}
-                >
-                    <Text
-                        style={{
-                            fontSize: 16,
-                            fontWeight: '600',
-                            color: '#fff',
-                        }}
-                    >
-                        Visit Website
-                    </Text>
-                </Pressable>
+                <View style={{ gap: 12 }}>
+                    {episodesLoading && <ActivityIndicator />}
+                    {episodesError && (
+                        <Text>
+                            Error loading episodes {episodesError.message}
+                        </Text>
+                    )}
+                    {episodesData?.items.map((episode) => (
+                        <EpisodeCard key={episode.id} episode={episode} />
+                    ))}
+                </View>
             </View>
         </ScrollView>
     );
